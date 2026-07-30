@@ -28,3 +28,8 @@ The primary objective is to adapt a deep neural network's bottleneck feature rep
 ### Datasets
 - **MNIST (Source):** $28 \times 28$ resolution, high contrast, uniform stroke thickness.
 - **USPS (Target):** Natively $16 \times 16$, lower resolution, varying stroke weights, and spatial noise.
+
+```text
+[MNIST Source Images (28x28)] ───► [Shared Convolutional Backbone] ───► Source Latent Features (f_S) ──┐
+                                                                                                        ├── Deep CORAL Loss (C_S vs C_T)
+[USPS Target Images (28x28)] ───► [Shared Convolutional Backbone] ───► Target Latent Features (f_T) ──┘
