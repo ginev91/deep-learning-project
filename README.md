@@ -70,15 +70,15 @@ To enable both datasets to share the same convolutional backbone, all images are
 
 USPS images have a native resolution of
 
-16 \times 16,
+16 × 16,
 
 while MNIST images are
 
-28 \times 28.
+28 × 28.
 
 USPS images are therefore resized using **bilinear interpolation** to
 
-28 \times 28.
+28 × 28.
 
 ### Pixel Normalization
 
@@ -94,7 +94,7 @@ using
 
 x_norm
 =
-\fracx-0.50.5.
+x-0.50.5.
 
 ## Dataset Properties
 
@@ -148,9 +148,9 @@ Principal Component Analysis performs a linear projection by preserving the dire
 
 The projection is computed as
 
-\mathbfX_PCA
+X_PCA
 =
-\mathbfX\mathbfW_k.
+XW_k.
 
 ---
 
@@ -160,13 +160,13 @@ Unlike PCA, t-SNE is a nonlinear dimensionality reduction technique that preserv
 
 It minimizes the Kullback–Leibler divergence between probability distributions in the original and projected spaces:
 
-KL(P\parallel Q)
+KL(P ∥ Q)
 =
-\sum_i
-\sum_j
+Σ_i
+Σ_j
 p_ij
-\log
-\fracp_ijq_ij.
+log
+p_ijq_ij.
 
 ### Key Observation
 
@@ -223,13 +223,13 @@ Input (1×28×28)
 
 The baseline model minimizes the standard cross-entropy loss over the labeled source dataset:
 
-\mathcalL_cls
+L_cls
 =
--\frac1B
-\sum_i=1^B
-\sum_c=0^9
+-1B
+Σ_i=1^B
+Σ_c=0^9
 y_i,c
-\log(\hat y_i,c).
+log(\hat y_i,c).
 
 ---
 
@@ -262,33 +262,33 @@ D ∈ ℝᴮˣᵈ
 
 the covariance matrix is
 
-\mathbf C
+ C
 =
-\frac1B-1
+1B-1
 \left(
-\mathbf D^\top\mathbf D
+ D^\top D
 -
-\frac1B
-(\mathbf1^\top\mathbf D)^\top
-(\mathbf1^\top\mathbf D)
+1B
+(1^\top D)^\top
+(1^\top D)
 \right).
 
 The CORAL loss minimizes the squared Frobenius distance between the source and target covariance matrices:
 
-\mathcal L_CORAL
+ L_CORAL
 =
-\frac14d^2
+14d^2
 \left\|
-\mathbf C_S-\mathbf C_T
+ C_S- C_T
 \right\|_F^2.
 
 Equivalently,
 
-\mathcal L_CORAL
+ L_CORAL
 =
-\frac14d^2
-\sum_i=1^d
-\sum_j=1^d
+14d^2
+Σ_i=1^d
+Σ_j=1^d
 \left(
 C_S,ij
 -
@@ -305,12 +305,12 @@ d = 128.
 
 The total training objective combines classification and covariance alignment:
 
-\mathcal L_total
+ L_total
 =
-\mathcal L_CrossEntropy
+ L_CrossEntropy
 +
-\lambda
-\mathcal L_CORAL.
+λ
+ L_CORAL.
 
 The weighting coefficient is
 
@@ -371,7 +371,7 @@ These observations indicate that Deep CORAL successfully learns a more domain-in
 ## 8. Conclusion & Critical Analysis
 
 ### Key Takeaways
-- **Unsupervised Alignment:** Deep CORAL successfully aligns second-order statistics (covariances) between domains without using target labels, improving target accuracy (81.76\% \rightarrow 82.51\%).
+- **Unsupervised Alignment:** Deep CORAL successfully aligns second-order statistics (covariances) between domains without using target labels, improving target accuracy (81.76% → 82.51%).
 - **Efficiency:** Unlike adversarial methods (DANN), CORAL requires no extra discriminator network, making it computationally light and training-stable.
 
 ### Limitations & Next Steps
