@@ -406,3 +406,30 @@ Compared with the initial visualization:
 - Domain-specific clustering is significantly reduced while preserving semantic class separation.
 
 These observations indicate that Deep CORAL successfully learns a more domain-invariant feature representation while maintaining discriminative information necessary for accurate digit classification.
+## 8. Conclusion & Critical Analysis
+
+### Key Takeaways
+- **Unsupervised Alignment:** Deep CORAL successfully aligns second-order statistics (covariances) between domains without using target labels, improving target accuracy ($81.76\% \rightarrow 82.51\%$).
+- **Efficiency:** Unlike adversarial methods (DANN), CORAL requires no extra discriminator network, making it computationally light and training-stable.
+
+### Limitations & Next Steps
+- **Second-Order Bound:** CORAL ignores higher-order feature statistics, which limits alignment on extreme domain gaps.
+- **Future Directions:** Combining covariance alignment with Maximum Mean Discrepancy (MMD) or evaluating on complex benchmarks (e.g., SVHN → MNIST).
+
+---
+
+## 9. References & Reproducibility
+
+### Academic References
+1. **Sun, B., & Saenko, K. (2016).** *Deep CORAL: Correlation Alignment for Deep Domain Adaptation.* ECCV.
+2. **LeCun, Y., et al. (1998).** *Gradient-based learning applied to document recognition.* Proceedings of the IEEE.
+3. **Hull, J. J. (1994).** *A database for handwritten text recognition research (USPS).* IEEE TPAMI.
+
+### Hyperparameters
+| Parameter | Value |
+| :--- | :--- |
+| **Random Seed** | `42` |
+| **Optimizer** | Adam ($\text{lr} = 10^{-3}$) |
+| **CORAL Weight ($\lambda$)** | `10.0` |
+| **Feature Dimension ($d$)** | `128` |
+| **Batch Size** | `128` |
