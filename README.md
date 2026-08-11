@@ -11,13 +11,13 @@
 
 Standard deep learning models assume that training and deployment data come from identical distributions (**i.i.d. assumption**). In real-world computer vision systems, this assumption frequently collapses due to **domain shift** (variations in lighting, background noise, resolution, or sensor characteristics):
 
-$$P_S(X) \neq P_T(X) \quad \text{while assuming} \quad P_S(Y\vert{}X) \approx P_T(Y\vert{}X)$$
+Pₛ(X) ≠ Pₜ(X), while Pₛ(Y|X) ≈ Pₜ(Y|X)
 
 When a Convolutional Neural Network (CNN) trained on clean, centered images is evaluated on noisy or lower-resolution images, its high-level latent features fail to generalize.
 
 This project implements **Unsupervised Domain Adaptation (UDA)** between two classic digit recognition benchmarks:
-* **Source Domain ($D_S$):** **MNIST** (70,000 clean, centered $28 \times 28$ grayscale images) with full class labels.
-* **Target Domain ($D_T$):** **USPS** (9,298 noisy, $16 \times 16$ grayscale scans from real mail envelopes) with **no labels** available during model adaptation.
+* **Source Domain (D_S):** **MNIST** (70,000 clean, centered 28 × 28 grayscale images) with full class labels.
+* **Target Domain (D_T):** **USPS** (9,298 noisy, 16 × 16 grayscale scans from real mail envelopes) with **no labels** available during model adaptation.
 
 The primary objective is to adapt a deep neural network's bottleneck feature representations using **Deep CORAL (Deep Correlation Alignment)** (*Sun & Saenko, 2016*), training the network to extract domain-invariant features across both datasets simultaneously.
 
@@ -26,8 +26,8 @@ The primary objective is to adapt a deep neural network's bottleneck feature rep
 ## Data & Deep Learning Pipeline
 
 ### Datasets
-- **MNIST (Source):** $28 \times 28$ resolution, high contrast, uniform stroke thickness.
-- **USPS (Target):** Natively $16 \times 16$, lower resolution, varying stroke weights, and spatial noise.
+- **MNIST (Source):** 28 × 28 resolution, high contrast, uniform stroke thickness.
+- **USPS (Target):** Natively 16 × 16, lower resolution, varying stroke weights, and spatial noise.
 
 ```text
 [MNIST Source Images (28x28)] ───► [Shared Convolutional Backbone] ───► Source Latent Features (f_S) ──┐
@@ -70,51 +70,39 @@ To enable both datasets to share the same convolutional backbone, all images are
 
 USPS images have a native resolution of
 
-$$
 16 \times 16,
-$$
 
 while MNIST images are
 
-$$
 28 \times 28.
-$$
 
 USPS images are therefore resized using **bilinear interpolation** to
 
-$$
 28 \times 28.
-$$
 
 ### Pixel Normalization
 
 Pixel values are normalized from
 
-$$
 [0,1]
-$$
 
 to
 
-$$
-[-1,1]
-$$
+[-1, 1]
 
 using
 
-$$
-x_{\text{norm}}
+x_norm
 =
-\frac{x-0.5}{0.5}.
-$$
+\fracx-0.50.5.
 
 ## Dataset Properties
 
 | Property | Source Domain (MNIST) | Target Domain (USPS) |
 |-----------|----------------------|----------------------|
 | Data Type | Synthetic handwritten digits | Scanned postal digits |
-| Native Resolution | $28 \times 28$ | $16 \times 16$ |
-| Network Input | $1 \times 28 \times 28$ | $1 \times 28 \times 28$ |
+| Native Resolution | 28 × 28 | 16 × 16 |
+| Network Input | 1 × 28 × 28 | 1 × 28 × 28 |
 | Labels | Fully labeled | Unlabeled during training |
 | Batch Size | 128 | 128 |
 
@@ -148,9 +136,7 @@ To visualize the initial domain discrepancy, batches from both datasets are pass
 
 The bottleneck feature representation is
 
-$$
-\mathbf{z}\in\mathbb{R}^{128}.
-$$
+z ∈ ℝ¹²⁸.
 
 These high-dimensional vectors are projected into two dimensions using PCA and t-SNE.
 
@@ -162,11 +148,9 @@ Principal Component Analysis performs a linear projection by preserving the dire
 
 The projection is computed as
 
-$$
-\mathbf{X}_{\text{PCA}}
+\mathbfX_PCA
 =
-\mathbf{X}\mathbf{W}_k.
-$$
+\mathbfX\mathbfW_k.
 
 ---
 
@@ -176,15 +160,13 @@ Unlike PCA, t-SNE is a nonlinear dimensionality reduction technique that preserv
 
 It minimizes the Kullback–Leibler divergence between probability distributions in the original and projected spaces:
 
-$$
 KL(P\parallel Q)
 =
 \sum_i
 \sum_j
-p_{ij}
+p_ij
 \log
-\frac{p_{ij}}{q_{ij}}.
-$$
+\fracp_ijq_ij.
 
 ### Key Observation
 
@@ -241,15 +223,13 @@ Input (1×28×28)
 
 The baseline model minimizes the standard cross-entropy loss over the labeled source dataset:
 
-$$
-\mathcal{L}_{\text{cls}}
+\mathcalL_cls
 =
 -\frac1B
-\sum_{i=1}^{B}
-\sum_{c=0}^{9}
-y_{i,c}
-\log(\hat y_{i,c}).
-$$
+\sum_i=1^B
+\sum_c=0^9
+y_i,c
+\log(\hat y_i,c).
 
 ---
 
@@ -262,9 +242,7 @@ $$
 
 **Performance Drop**
 
-$$
-98.64\%-81.76\%=16.88\%.
-$$
+98.64% − 81.76% = 16.88%.
 
 This large decrease demonstrates that excellent source-domain performance does not necessarily translate into good target-domain generalization.
 
@@ -280,16 +258,13 @@ To reduce the domain discrepancy without using target labels, the project incorp
 
 For a batch of deep features
 
-$$
-\mathbf D\in\mathbb R^{B\times d},
-$$
+D ∈ ℝᴮˣᵈ
 
 the covariance matrix is
 
-$$
 \mathbf C
 =
-\frac1{B-1}
+\frac1B-1
 \left(
 \mathbf D^\top\mathbf D
 -
@@ -297,39 +272,32 @@ $$
 (\mathbf1^\top\mathbf D)^\top
 (\mathbf1^\top\mathbf D)
 \right).
-$$
 
 The CORAL loss minimizes the squared Frobenius distance between the source and target covariance matrices:
 
-$$
-\mathcal L_{\text{CORAL}}
+\mathcal L_CORAL
 =
-\frac1{4d^2}
+\frac14d^2
 \left\|
 \mathbf C_S-\mathbf C_T
 \right\|_F^2.
-$$
 
 Equivalently,
 
-$$
-\mathcal L_{\text{CORAL}}
+\mathcal L_CORAL
 =
-\frac1{4d^2}
-\sum_{i=1}^{d}
-\sum_{j=1}^{d}
+\frac14d^2
+\sum_i=1^d
+\sum_j=1^d
 \left(
-C_{S,ij}
+C_S,ij
 -
-C_{T,ij}
+C_T,ij
 \right)^2.
-$$
 
 For this project,
 
-$$
-d=128.
-$$
+d = 128.
 
 ---
 
@@ -337,20 +305,16 @@ $$
 
 The total training objective combines classification and covariance alignment:
 
-$$
-\mathcal L_{\text{total}}
+\mathcal L_total
 =
-\mathcal L_{\text{CrossEntropy}}
+\mathcal L_CrossEntropy
 +
 \lambda
-\mathcal L_{\text{CORAL}}.
-$$
+\mathcal L_CORAL.
 
 The weighting coefficient is
 
-$$
-\lambda=10.0,
-$$
+λ = 10.0
 
 which balances source-domain classification accuracy with domain-invariant feature learning.
 
@@ -393,9 +357,7 @@ The confusion matrices reveal class-specific improvements after applying Deep CO
 
 The bottleneck features
 
-$$
-f\in\mathbb R^{128}
-$$
+f ∈ ℝ¹²⁸
 
 are projected once again using t-SNE after training.
 
@@ -409,7 +371,7 @@ These observations indicate that Deep CORAL successfully learns a more domain-in
 ## 8. Conclusion & Critical Analysis
 
 ### Key Takeaways
-- **Unsupervised Alignment:** Deep CORAL successfully aligns second-order statistics (covariances) between domains without using target labels, improving target accuracy ($81.76\% \rightarrow 82.51\%$).
+- **Unsupervised Alignment:** Deep CORAL successfully aligns second-order statistics (covariances) between domains without using target labels, improving target accuracy (81.76\% \rightarrow 82.51\%).
 - **Efficiency:** Unlike adversarial methods (DANN), CORAL requires no extra discriminator network, making it computationally light and training-stable.
 
 ### Limitations & Next Steps
@@ -429,7 +391,7 @@ These observations indicate that Deep CORAL successfully learns a more domain-in
 | Parameter | Value |
 | :--- | :--- |
 | **Random Seed** | `42` |
-| **Optimizer** | Adam ($\text{lr} = 10^{-3}$) |
-| **CORAL Weight ($\lambda$)** | `10.0` |
-| **Feature Dimension ($d$)** | `128` |
+| **Optimizer** | Adam (lr = 10⁻³) |
+| **CORAL Weight (λ)** | `10.0` |
+| **Feature Dimension (d)** | `128` |
 | **Batch Size** | `128` |
