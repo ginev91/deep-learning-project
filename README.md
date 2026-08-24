@@ -11,7 +11,9 @@
 
 Standard deep learning models assume that training and deployment data come from identical distributions (**i.i.d. assumption**). In real-world computer vision systems, this assumption frequently collapses due to **domain shift** (variations in lighting, background noise, resolution, or sensor characteristics):
 
-Pₛ(X) ≠ Pₜ(X), while Pₛ(Y|X) ≈ Pₜ(Y|X)
+$$
+P_S(X) \neq P_T(X), \quad \text{while} \quad P_S(Y|X) \approx P_T(Y|X)
+$$
 
 When a Convolutional Neural Network (CNN) trained on clean, centered images is evaluated on noisy or lower-resolution images, its high-level latent features fail to generalize.
 
@@ -68,33 +70,15 @@ To enable both datasets to share the same convolutional backbone, all images are
 
 ### Image Resizing
 
-USPS images have a native resolution of
-
-16 × 16,
-
-while MNIST images are
-
-28 × 28.
-
-USPS images are therefore resized using **bilinear interpolation** to
-
-28 × 28.
+USPS images have a native resolution of 16 × 16, while MNIST images are 28 × 28. USPS images are therefore resized using **bilinear interpolation** to 28 × 28.
 
 ### Pixel Normalization
 
-Pixel values are normalized from
+Pixel values are normalized from [0, 1] to [-1, 1] using:
 
-[0,1]
-
-to
-
-[-1, 1]
-
-using
-
-x_norm
-=
-x-0.50.5.
+$$
+x_{\text{norm}} = \frac{x - 0.5}{0.5}
+$$
 
 ## Dataset Properties
 
@@ -134,39 +118,27 @@ Although both datasets contain the same semantic classes (digits 0–9), these l
 
 To visualize the initial domain discrepancy, batches from both datasets are passed through a randomly initialized CNN feature extractor.
 
-The bottleneck feature representation is
-
-z ∈ ℝ¹²⁸.
-
-These high-dimensional vectors are projected into two dimensions using PCA and t-SNE.
+The bottleneck feature representation is z ∈ ℝ¹²⁸. These high-dimensional vectors are projected into two dimensions using PCA and t-SNE.
 
 ---
 
 ## 4.1 Principal Component Analysis (PCA)
 
-Principal Component Analysis performs a linear projection by preserving the directions of maximum variance.
+Principal Component Analysis performs a linear projection by preserving the directions of maximum variance. The projection is computed as:
 
-The projection is computed as
-
-X_PCA
-=
-XW_k.
+$$
+X_{\text{PCA}} = X W_k
+$$
 
 ---
 
 ## 4.2 t-Distributed Stochastic Neighbor Embedding (t-SNE)
 
-Unlike PCA, t-SNE is a nonlinear dimensionality reduction technique that preserves local neighborhood structure.
+Unlike PCA, t-SNE is a nonlinear dimensionality reduction technique that preserves local neighborhood structure. It minimizes the Kullback–Leibler divergence between probability distributions in the original and projected spaces:
 
-It minimizes the Kullback–Leibler divergence between probability distributions in the original and projected spaces:
-
-KL(P ∥ Q)
-=
-Σ_i
-Σ_j
-p_ij
-log
-p_ijq_ij.
+$$
+KL(P \| Q) = \sum_i \sum_j p_{ij} \log \frac{p_{ij}}{q_{ij}}
+$$
 
 ### Key Observation
 
@@ -223,13 +195,9 @@ Input (1×28×28)
 
 The baseline model minimizes the standard cross-entropy loss over the labeled source dataset:
 
-L_cls
-=
--1B
-Σ_i=1^B
-Σ_c=0^9
-y_i,c
-log(\hat y_i,c).
+$$
+\mathcal{L}_{\text{cls}} = -\frac{1}{B} \sum_{i=1}^{B} \sum_{c=0}^{9} y_{i,c} \log(\hat{y}_{i,c})
+$$
 
 ---
 
@@ -254,48 +222,25 @@ To reduce the domain discrepancy without using target labels, the project incorp
 
 ## 6.1 Mathematical Formulation
 
-For a batch of deep features
+For a batch of deep features D ∈ ℝᴮˣᵈ, the covariance matrix is:
 
-D ∈ ℝᴮˣᵈ
-
-the covariance matrix is
-
- C
-=
-1B-1
-\left(
- D^\top D
--
-1B
-(1^\top D)^\top
-(1^\top D)
-\right).
+$$
+C = \frac{1}{B-1} \left( D^\top D - \frac{1}{B} (\mathbf{1}^\top D)^\top (\mathbf{1}^\top D) \right)
+$$
 
 The CORAL loss minimizes the squared Frobenius distance between the source and target covariance matrices:
 
- L_CORAL
-=
-14d^2
-\left\|
- C_S- C_T
-\right\|_F^2.
+$$
+\mathcal{L}_{\text{CORAL}} = \frac{1}{4d^2} \left\| C_S - C_T \right\|_F^2
+$$
 
 Equivalently,
 
- L_CORAL
-=
-14d^2
-Σ_i=1^d
-Σ_j=1^d
-\left(
-C_S,ij
--
-C_T,ij
-\right)^2.
+$$
+\mathcal{L}_{\text{CORAL}} = \frac{1}{4d^2} \sum_{i=1}^{d} \sum_{j=1}^{d} \left( C_{S,ij} - C_{T,ij} \right)^2
+$$
 
-For this project,
-
-d = 128.
+For this project, d = 128.
 
 ---
 
@@ -303,7 +248,9 @@ d = 128.
 
 The total training objective combines classification and covariance alignment:
 
-L_total = L_CrossEntropy + λ · L_CORAL
+$$
+\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{CrossEntropy}} + \lambda \cdot \mathcal{L}_{\text{CORAL}}
+$$
 
 The weighting coefficient λ is selected via grid search over candidate values `[0.1, 1.0, 3.0, 10.0, 30.0]`, evaluated on a held-out labeled validation split of the USPS test set. The selected value, λ = 1.0, is used for all reported CORAL results.
 
@@ -344,11 +291,7 @@ The confusion matrices reveal class-specific improvements after applying Deep CO
 
 ## 7.3 Post-Adaptation Feature Alignment (t-SNE)
 
-The bottleneck features
-
-f ∈ ℝ¹²⁸
-
-are projected once again using t-SNE after training.
+The bottleneck features f ∈ ℝ¹²⁸ are projected once again using t-SNE after training.
 
 Compared with the initial visualization:
 
